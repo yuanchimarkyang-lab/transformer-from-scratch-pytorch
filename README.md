@@ -1,8 +1,8 @@
 # Mini-project: transformer implementation from scratch in pytorch
 ## Project Overview
-This mini-project implements an encoder–decoder Transformer from scratch and trains the model on the [Multi30K German-to-English translation task](https://huggingface.co/datasets/bentrevett/multi30k), achieving a corpus BLEU score above 30 on the held-out test set after 50 epochs.
+This mini-project implements an encoder–decoder Transformer from scratch using core PyTorch components and trains it on the Multi30K German-to-English translation task. The implementation includes scaled dot-product attention, multi-head attention, positional encoding, causal/padding masks, and autoregressive decoding, without using nn.Transformer or nn.MultiheadAttention.
 
-The goal of this mini-project is to build hands-on experience with the key components of the Transformer architecture. 
+The goal of this mini-project is to strengthen my PyTorch implementation skills and deepen my understanding of the Transformer architecture.
 
 ## Architecture Implemented
 - scaled dot-product attention
@@ -23,11 +23,11 @@ Note that these are implemented without nn.Transformer / nn.MultiheadAttention.
     - Encoder Blocks: 3
     - Decoder Blocks: 3
     - Embedding Size: 256
-    - Number of Attention Head: 8
-    - Inner Dimentions of Feed-Forward Networks: 512
+    - Attention Heads: 8
+    - Feed-Forward Hidden Dimension: 512
     - Maximum Sequence Length: 100
 - Tokenizer: Google's SentencePiece tokenizer, trained on the training set.
-- Dictionary Size: 8,000 for both English and German
+- Vocabulary Size: 8,000 for both English and German
 - Optimizer: Adam
     - Learning rate: 1e-1 initially, scheduled to reduce on plateau with factor 0.5, patience 5, and minimum learning rate 1e-4
 - Batch size: 64
@@ -38,27 +38,24 @@ Note that these are implemented without nn.Transformer / nn.MultiheadAttention.
 
 ## Results
 <p float="left">
-  <img src="./results/baseline/loss_curve.png" width="49%" />
-  <img src="./results/baseline/BLEU_curve.png" width="49%" />
+  <img src="results/baseline/loss_curve.png" width="49%" />
+  <img src="results/baseline/BLEU_curve.png" width="49%" />
 </p>
 
-Besides a few seemly random jump, the training loss kept decreasing as epoch increases, while the validation loss seems to saturate at around 50-th epoch. 
-This seems to be consistent with the BLEU scores, they first increases and then seems to saturate after 60-th epoch.
-Overall, the BLEU scores on the held out sets (both validation and test sets) rise above 30 after 50-th epoch. 
+The training loss continued to decrease throughout the training, while the validation loss plateaued after roughly epoch 50. 
+BLEU followed a similar trend, improving rapidly during early training and leveling off at around 60–70 epochs. 
+The best validation BLEU was 32.7 at Epoch 70; the selected model achieved a test corpus BLEU score of 32.8.
 
-
-Some example translations are given as the following:
+The following are translations made by the selected model on the held-out test set:
 
 | Source | Target | Prediction | Note | 
 | :------| :----- | :--------- | :--- |
-| Drei Leute sitzen in einer Höhle. | Three people sit in a cave. | Three people sitting in a cave. | The model seems to works well on short sentences. |
-| Ein Typ arbeitet an einem Gebäude. |  A guy works on a building. | A guy working on a building. | The model seems to works well on short sentences. |
-| Ein Boston Terrier läuft über saftig-grünes Gras vor einem weißen Zaun. |  A Boston Terrier is running on lush green grass in front of a white fence. | A Boston colored grass is walking across the grass field of a white fence. | The model gets part of the scene right ('grass', 'white fence') but makes mistakes at the main subject ('Boston Terrier' vs 'Boston colored grass') and the action ('running' vs 'walking' well maybe close enough) |
-| Fünf Leute in Winterjacken und mit Helmen stehen im Schnee mit Schneemobilen im Hintergrund. | Five people wearing winter jackets and helmets stand in the snow, with snowmobiles in the background. | Five people in winter jackets and helmets are standing in the snow with snow in the background. | The model gets most of the scene right, but it makes mistake on the background ("snowmobiles" vs "snow") |
+| Drei Leute sitzen in einer Höhle. | Three people sit in a cave. | Three people sitting in a cave. | The model works well on short sentences. |
+| Ein Typ arbeitet an einem Gebäude. |  A guy works on a building. | A guy working on a building. | The model works well on short sentences. |
+| Ein Boston Terrier läuft über saftig-grünes Gras vor einem weißen Zaun. |  A Boston Terrier is running on lush green grass in front of a white fence. | A Boston colored grass is walking across the grass field of a white fence. | The model gets part of the scene right ('grass', 'white fence') but makes mistakes in the main subject ('Boston Terrier' vs 'Boston colored grass') and the action ('running' vs 'walking') |
+| Fünf Leute in Winterjacken und mit Helmen stehen im Schnee mit Schneemobilen im Hintergrund. | Five people wearing winter jackets and helmets stand in the snow, with snowmobiles in the background. | Five people in winter jackets and helmets are standing in the snow with snow in the background. | The model gets most of the scene right, but it misidentified the background object ("snowmobiles" vs "snow") |
 
 
-## Note
-This implementation was done without nn.Transformer / nn.MultiheadAttention.
 
 ## Running the project
 
@@ -72,7 +69,7 @@ uv sync
 
 Prepare the training data
 ```bash
-uv run python preapare_data.py
+uv run python prepare_data.py
 ```
 
 Train the model
@@ -111,7 +108,7 @@ transformer-from-scratch-pytorch/
 ├── train.py
 ├── evaluate.py
 ├── plot_training_trajectory.py
-├── python generate_demo.py
+├── generate_demo.py
 ├── pyproject.toml
 └── README.md
 ```
