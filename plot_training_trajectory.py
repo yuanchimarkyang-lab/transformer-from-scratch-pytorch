@@ -17,9 +17,11 @@ if __name__ == "__main__":
     plt.grid()
     plt.xlabel("Epoch", fontsize=14)
     plt.ylabel("Train/Val Loss", fontsize=14)
+    plt.title("Loss vs Epoch", fontsize=14)
     plt.legend()
     plt.tight_layout()
     plt.savefig(f"{folder}/loss_curve.png",dpi=600)
+    plt.clf()
 
     # Plot the Validation/Test BLEU score versus checkpoint (epoch)
     plt.plot(df_bleu["checkpoint"], df_bleu["val_bleu_score"], color = 'b', marker = 'x', linestyle = '--', label = "Validation")
@@ -27,9 +29,11 @@ if __name__ == "__main__":
     plt.grid()
     plt.xlabel("Epoch", fontsize=14)
     plt.ylabel("BLEU score", fontsize=14)
+    plt.title("Epoch vs Epoch", fontsize=14)
     plt.legend()
     plt.tight_layout()
     plt.savefig(f"{folder}/BLEU_curve.png",dpi=600)
+    plt.clf()
 
     print(f"Done! Figures are generated in {folder}")
 
