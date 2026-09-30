@@ -53,7 +53,7 @@ if __name__ == "__main__":
     output_path = Path("results/baseline")
     config_path = output_path / "config.yaml"
     config = load_config(config_path)
-    checkpoint = "000100"
+    checkpoint = "000070"
 
     dataset = load_dataset("data/multi30k")
     print(dataset)
