@@ -1,0 +1,22 @@
+device: cuda
+
+dataset: all
+vocab_size: 8000
+
+D_model: 256
+h: 8
+N_encoder: 3
+N_decoder: 3
+D_FFN: 512
+max_len: 100
+
+epochs: 100
+log_freq: 1
+save_freq: 10
+learning_rate: 0.1
+lr_factor: 0.5
+lr_patience: 5
+lr_min: 0.0001
+
+
+output_dir: results/baseline
