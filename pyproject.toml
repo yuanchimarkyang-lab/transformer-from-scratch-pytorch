@@ -1,0 +1,22 @@
+[project]
+name = "transformer-from-scratch-pytorch"
+version = "0.1.0"
+description = "This environment enable transformer implementation from scratch using pytorch"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "datasets>=5.0.1",
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.3",
+    "pandas>=3.0.6",
+    "sentencepiece>=0.2.2",
+    "torch>=2.14.0",
+    "torchinfo>=1.8.0",
+    "torchmetrics>=1.9.0",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.3.0",
+    "pytest>=9.1.1",
+]
