@@ -28,7 +28,7 @@ if __name__ == "__main__":
     plt.grid()
     plt.xlabel("Epoch", fontsize=14)
     plt.ylabel("BLEU score", fontsize=14)
-    plt.title("BLEU score vs Epoch", fontsize=14)
+    plt.title("Validation BLEU score vs Epoch", fontsize=14)
     plt.legend()
     plt.tight_layout()
     plt.savefig(f"{folder}/BLEU_curve.png",dpi=600)
