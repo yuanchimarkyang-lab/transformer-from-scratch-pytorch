@@ -37,11 +37,28 @@ Note that these are implemented without nn.Transformer / nn.MultiheadAttention.
 
 
 ## Results
+<p float="left">
+  <img src="./results/baseline/loss_curve.png" width="49%" />
+  <img src="./results/baseline/BLEU_curve.png" width="49%" />
+</p>
+
+Besides a few seemly random jump, the training loss kept decreasing as epoch increases, while the validation loss seems to saturate at around 50-th epoch. 
+This seems to be consistent with the BLEU scores, they first increases and then seems to saturate after 60-th epoch.
+Overall, the BLEU scores on the held out sets (both validation and test sets) rise above 30 after 50-th epoch. 
 
 
+Some example translations are given as the following:
 
-## Notes
+| Source | Target | Prediction | Note | 
+| :------| :----- | :--------- | :--- |
+| Drei Leute sitzen in einer Höhle. | Three people sit in a cave. | Three people sitting in a cave. | The model seems to works well on short sentences. |
+| Ein Typ arbeitet an einem Gebäude. |  A guy works on a building. | A guy working on a building. | The model seems to works well on short sentences. |
+| Ein Boston Terrier läuft über saftig-grünes Gras vor einem weißen Zaun. |  A Boston Terrier is running on lush green grass in front of a white fence. | A Boston colored grass is walking across the grass field of a white fence. | The model gets part of the scene right ('grass', 'white fence') but makes mistakes at the main subject ('Boston Terrier' vs 'Boston colored grass') and the action ('running' vs 'walking' well maybe close enough) |
+| Fünf Leute in Winterjacken und mit Helmen stehen im Schnee mit Schneemobilen im Hintergrund. | Five people wearing winter jackets and helmets stand in the snow, with snowmobiles in the background. | Five people in winter jackets and helmets are standing in the snow with snow in the background. | The model gets most of the scene right, but it makes mistake on the background ("snowmobiles" vs "snow") |
 
+
+## Note
+This implementation was done without nn.Transformer / nn.MultiheadAttention.
 
 ## Running the project
 
@@ -73,6 +90,11 @@ Plot the training trajectory
 uv run python plot_training_trajectory.py
 ```
 
+Generate the translations in demo
+```bash
+uv run python generate_demo.py
+```
+
 
 
 ## Repository structure
@@ -88,6 +110,8 @@ transformer-from-scratch-pytorch/
 ├── prepare_data.py
 ├── train.py
 ├── evaluate.py
+├── plot_training_trajectory.py
+├── python generate_demo.py
 ├── pyproject.toml
 └── README.md
 ```
