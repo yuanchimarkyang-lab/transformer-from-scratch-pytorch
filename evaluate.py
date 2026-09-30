@@ -92,7 +92,7 @@ if __name__ == "__main__":
     config = load_config(config_path)
 
     # define the checkpoints
-    checkpoints = ["000010"]#["000010", "000020","000030","000040","000050","000060", "000070","000080","000090","000100"]
+    checkpoints = ["000010", "000020","000030","000040","000050","000060", "000070","000080","000090","000100"]
     
     # load the dataset
     dataset = load_dataset("data/multi30k")
@@ -115,7 +115,11 @@ if __name__ == "__main__":
 
     device = config["device"]
 
-    model = transformer(D_model=config["D_model"],
+    
+    
+    info_list = []
+    for checkpoint in checkpoints:
+        model = transformer(D_model=config["D_model"],
                         h=config["h"], # n_heads 
                         Vocab_size = config["vocab_size"], # vocab_size, 
                         N_encoder = config["N_encoder"], 
@@ -124,20 +128,21 @@ if __name__ == "__main__":
                         PAD=PAD,
                         max_len=config["max_len"], 
                     ).to(device)
-    
-    info_list = []
-    for checkpoint in checkpoints:
+
         print(f"checkpoint {checkpoint}\n----------------------------------------")
         checkpoint_path = output_path / f"checkpoints/{checkpoint}.pth"
         # load the saved checkpoint
         model.load_state_dict(torch.load(checkpoint_path, weights_only=True))
         print(f"The following checkpoint is loaded {checkpoint_path}")
 
+
         # calculate the BLEU score
         val_bleu_score = BLEU_score_generated(val_dataloader, model)
         print(f"Validation BLEU score: {val_bleu_score:>5.3f}")
         test_bleu_score = BLEU_score_generated(test_dataloader, model)
         print(f"Test BLEU score: {test_bleu_score:>5.3f}")
+
+        del model
 
         info = {"checkpoint": checkpoint,
                 "val_bleu_score": val_bleu_score, 
