@@ -14,6 +14,12 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 def load_config(config_path="configs/env.yaml"):
     """
     Load a YAML config file relative to the project root
+    
+    Parameters:
+        config_path: Path to the configuration file
+
+    Return: 
+        config: the configuration as a dictionary
     """
 
     full_path = PROJECT_ROOT / config_path

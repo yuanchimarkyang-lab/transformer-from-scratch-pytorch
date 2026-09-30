@@ -1,8 +1,7 @@
 """
-T
+    This script defines the collate function that converts sentences from a batch into sequences of tokens
 
 """
-
 
 from torch.nn.utils.rnn import pad_sequence
 import torch
@@ -10,10 +9,19 @@ from transformer.constants import PAD, BOS, EOS, UNK
 
 
 
-
-
 def collate_fn(dataBatch, en_sp, de_sp):
+    """
+    Parameters:
+        en_sp: the English tokenizer 
+        de_sp: the German tokenizer 
+        dataBatch: a batch of data
+    
+    Returns:
+        encoder_input: a torch array with shape (Batch_Size, Seq_length) for encoder input
+        decoder_input: a torch array with shape (Batch_Size, Seq_length) for decoder input 
+        decoder_output: a torch array with shape (Batch_Size, Seq_length) for decoder output
 
+    """
 
     tgt = en_sp.encode([data["en"] for data in dataBatch], out_type=int)
     src = de_sp.encode([data["de"] for data in dataBatch], out_type=int)

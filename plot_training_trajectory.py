@@ -1,5 +1,5 @@
 """
-This script is to generate figures to evaluate the training, including Loss vs Epoch and BLEU vs Epoch
+This script is to generate figures to evaluate the training, including Cross-Entropy Loss vs Epoch and BLEU score vs Epoch
 """
 import matplotlib.pyplot as plt
 import pandas as pd

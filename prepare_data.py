@@ -1,3 +1,6 @@
+"""
+This script prepares the training data and tokenizers for a German to English translation task
+"""
 from pathlib import Path
 from datasets import load_dataset
 import sentencepiece as spm
@@ -5,10 +8,10 @@ import sentencepiece as spm
 from transformer.config import load_config
 
 if __name__ == "__main__":
-
+    # reading the configuration
     config_path = Path("configs/config.yaml")
     config = load_config(config_path)
-    
+    # load the dataset (from huggingface)
     dataset = load_dataset("bentrevett/multi30k")
     dataset.save_to_disk("data/multi30k")
 
@@ -21,7 +24,8 @@ if __name__ == "__main__":
             f_en.write(example["en"].strip() + "\n")
 
     vocab_size = config["vocab_size"]
-    # train tokenizer
+    
+    # train the tokenizers
     spm.SentencePieceTrainer.train(
         input="data/tokenizer/train.de",
         model_prefix=f"data/tokenizer/de_{vocab_size}",
