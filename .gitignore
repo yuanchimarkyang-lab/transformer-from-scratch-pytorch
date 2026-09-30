@@ -14,7 +14,6 @@ data/
 
 # checkpoints
 results/**/checkpoints/*
-results/baseline2
 
 # jupyter-notebook
 .ipynb_checkpoints/
