@@ -62,7 +62,7 @@ The following are translations made by the selected model on the held-out test s
 This project uses [uv] for dependency management.
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/yuanchimarkyang-lab/transformer-from-scratch-pytorch
 cd transformer-from-scratch-pytorch
 uv sync
 ```
