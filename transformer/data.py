@@ -1,10 +1,19 @@
+"""
+T
+
+"""
+
+
 from torch.nn.utils.rnn import pad_sequence
+import torch
+from transformer.constants import PAD, BOS, EOS, UNK
 
 
 
 
 
 def collate_fn(dataBatch, en_sp, de_sp):
+
 
     tgt = en_sp.encode([data["en"] for data in dataBatch], out_type=int)
     src = de_sp.encode([data["de"] for data in dataBatch], out_type=int)

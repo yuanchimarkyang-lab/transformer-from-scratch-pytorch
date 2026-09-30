@@ -130,33 +130,32 @@ class DecoderBlock(torch.nn.Module):
         return x
 
 class PositionalEncoding(torch.nn.Module):
-    def __init__(self, embedding_dim: int, max_len: int = 5000):
+    def __init__(self, embedding_dim, max_len):
         super().__init__()
-        # Create a matrix of shape [1, max_len, embedding_dim] filled with zeros
-        pe = torch.zeros(1, max_len, embedding_dim)
-        # Generate position indices: [max_len, 1]
-        position = torch.arange(max_len, dtype=torch.float).unsqueeze(1)
-        # Compute the division term using logarithmic scale for numerical stability
-        div_term = torch.exp(torch.arange(0, embedding_dim, 2).float() * (-math.log(10000.0) / embedding_dim))
+        # calculating the parameters for the cosine/sine function
+        pos_array = np.expand_dims(np.array(range(max_len)),axis=1)
+        i_array = np.expand_dims(np.array([1/np.power(10000.0, 2*i/embedding_dim) for i in range(embedding_dim//2+embedding_dim%2)]),axis=0)
         
-        # Calculate sine values for even indices (0, 2, 4...)
-        pe[0, :, 0::2] = torch.sin(position * div_term)
-        # Calculate cosine values for odd indices (1, 3, 5...)
-        pe[0, :, 1::2] = torch.cos(position * div_term)
+        pos_i_matrix = torch.from_numpy(np.dot(pos_array,i_array)).unsqueeze(0)
         
-        # Register 'pe' as a buffer so it's saved in the state_dict but not trained by the optimizer
-        self.register_buffer('pe', pe)
-
-        self.dropout = torch.nn.Dropout(p=0.1)
+        
+        # calculating the Positional Encoding
+        PE = torch.zeros((1, max_len, embedding_dim))
+        PE[0, :,0::2] = torch.sin(pos_i_matrix)
+        if embedding_dim % 2 == 0:
+            PE[0, :,1::2] = torch.cos(pos_i_matrix)
+        else:
+            PE[0, :,1::2] = torch.cos(pos_i_matrix[0,:,:-1])
+        self.register_buffer('pe', PE) # self.pe is of dimension (max_len, embedding_dim)
+        
 
     def forward(self, x):
         """
-        Arguments:
-            x: Tensor of shape [batch_size, seq_len, embedding_dim]
+            x: batch array with size (batch_size, seq_length, embedding_dim)
         """
-        # Slice the positional encoding up to the current sequence length and add to input
-        x = x + self.pe[:, :x.size(1), :]
-        return self.dropout(x)
+        x = x + self.pe[:, :x.shape[1], :]
+
+        return x
 
 
 class transformer(torch.nn.Module):
@@ -171,19 +170,26 @@ class transformer(torch.nn.Module):
         self.N_encoder = N_encoder
         self.N_decoder = N_decoder
         self.PAD = PAD
+        self.Dict_size = Dict_size
+        self.max_len = max_len
+        self.D_FFN = D_FFN
+        self.p = p
 
-        self.InputEmbeddings = torch.nn.Embedding(Dict_size, D_model, padding_idx=PAD) # padding = 0
-        self.InputPE = PositionalEncoding(embedding_dim = D_model, max_len = max_len)
-        self.OutputEmbeddings = torch.nn.Embedding(Dict_size, D_model, padding_idx=PAD) # padding = 0
-        self.OutputPE = PositionalEncoding(embedding_dim = D_model, max_len = max_len)
+        self.InputEmbeddings = torch.nn.Embedding(self.Dict_size, self.D_model, padding_idx=self.PAD) # padding = 0
+        self.InputPE = PositionalEncoding(embedding_dim = self.D_model, max_len = self.max_len)
+        self.OutputEmbeddings = torch.nn.Embedding(self.Dict_size, self.D_model, padding_idx=self.PAD) # padding = 0
+        self.OutputPE = PositionalEncoding(embedding_dim = self.D_model, max_len = self.max_len)
 
-        self.EncoderBlocks = torch.nn.ModuleList([EncoderBlock(D_model=D_model, h=h, D_V=D_V, D_FFN=D_FFN, p=p) for _ in range(N_encoder)])
+        self.EncoderBlocks = torch.nn.ModuleList([
+            EncoderBlock(D_model=self.D_model, h=self.h, D_V=self.D_V, D_FFN=self.D_FFN, p=self.p) 
+            for _ in range(N_encoder)])
         self.DecoderBlocks = torch.nn.ModuleList([
-            DecoderBlock(D_model=D_model, h=h, D_V=D_V, D_FFN=D_FFN, p=p) 
+            DecoderBlock(D_model=self.D_model, h=self.h, D_V=self.D_V, D_FFN=self.D_FFN, p=self.p) 
             for _ in range(N_decoder)])
 
-        self.Linear = torch.nn.Linear(D_model,Dict_size)
+        self.Linear = torch.nn.Linear(self.D_model,self.Dict_size)
         self.softmax = torch.nn.Softmax(dim=1)
+        self.dropout = torch.nn.Dropout(p=self.p)
 
     def forward(self, encoder_input, decoder_input):
         encoder_input_mask = (encoder_input==self.PAD).unsqueeze(1)
@@ -191,12 +197,13 @@ class transformer(torch.nn.Module):
         
         encoder_output = self.InputEmbeddings(encoder_input) # (batch, #_input, D_model)
         encoder_output = self.InputPE(encoder_output)               # (batch, #_input, D_model)
+        encoder_output = self.dropout(encoder_output)
         for i in range(self.N_encoder):
             encoder_output = self.EncoderBlocks[i](encoder_output, encoder_input_mask)  # (batch, #_input, D_model)
 
         decoder_output = self.OutputEmbeddings(decoder_input) # (batch, #_output, D_model)
-        decoder_output = self.OutputPE(decoder_output)                  # (batch, #_output, D_model)
-
+        decoder_output = self.OutputPE(decoder_output)        # (batch, #_output, D_model)
+        decoder_output = self.dropout(decoder_output)
         for i in range(self.N_decoder):
             decoder_output = self.DecoderBlocks[i](decoder_output, encoder_output, decoder_input_mask, encoder_input_mask) # (batch, #_output, D_model)
 
@@ -204,3 +211,10 @@ class transformer(torch.nn.Module):
         decoder_output = torch.transpose(decoder_output,1,2) # (batch, dict_size, #_output)
 
         return decoder_output # logits
+
+if __name__ == "__main__":
+    PE_model = PositionalEncoding(embedding_dim = 10, max_len = 10)
+    x = torch.zeros((2,6,10))
+    y = PE_model(x)
+    print("x = ", x)
+    print("PE_model(x) = ", y)
