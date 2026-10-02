@@ -1,4 +1,4 @@
-# Mini-project: transformer implementation from scratch in pytorch
+# Transformer from Scratch — PyTorch
 ## Project Overview
 This mini-project implements an encoder–decoder Transformer from scratch using core PyTorch components and trains it on the Multi30K German-to-English translation task. The implementation includes scaled dot-product attention, multi-head attention, positional encoding, causal/padding masks, and autoregressive decoding, without using nn.Transformer or nn.MultiheadAttention.
 
